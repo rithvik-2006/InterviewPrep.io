@@ -1,4 +1,3 @@
----
 ## Chapter 1: Algorithms Intro
 
 An **algorithm** is a specific set of unambiguous, implementable instructions for solving a problem with a finite number of steps. In computer science, they are often described using **pseudocode**, a high-level, plain-English description independent of a specific programming language. Learning Data Structures and Algorithms (DSA) is crucial for developers to understand the **performance implications** of their code and to develop problem-solving skills. The key is to understand how algorithms work, not just to memorize them.
@@ -8,7 +7,7 @@ An **algorithm** is a specific set of unambiguous, implementable instructions fo
 * **Sum Function:** Calculates the total sum of a list of numbers. An edge case for an empty list is to return 0.
 * **Reverse String:** Loops through a string from last to first, adding characters to a new string.
 
----
+***
 ## Chapter 2: Math
 
 A basic understanding of mathematics is essential for analyzing algorithms.
