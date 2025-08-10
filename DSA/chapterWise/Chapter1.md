@@ -1,4 +1,3 @@
-Here are detailed revision notes on Chapter 1 of the sources, focusing on the fundamental concepts of algorithms and including pseudocode examples where relevant:
 
 ### Chapter 1: Introduction to Algorithms
 
