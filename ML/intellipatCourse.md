@@ -376,5 +376,3 @@ These refer to common problems in model generalisation:
 *   **Boosting (as compared to Bagging)**:
     *   **Bagging (Random Forest)**: Models are trained **independently and in parallel**. Focuses on **reducing variance** by averaging predictions from diverse models.
     *   **Boosting**: Models are trained **sequentially**, with each new model focusing on and correcting the errors made by the previous ones. Focuses on **reducing bias** and improving weak models.
-
-These notes provide a comprehensive overview of the topics discussed in the video, drawing directly from the provided sources.
