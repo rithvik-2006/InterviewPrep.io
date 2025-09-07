@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DSA Progress Tracker</title>
+    <meta name="description" content="A futuristic, self-contained DSA progress tracker to track your GFG, NeetCode, and LeetCode journey.">
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --neon-blue: #0077ff;
+            --neon-purple: #8800ff;
+            --neon-green: #00ffaa;
+            --neon-red: #ff3366;
+            --text-color: #e0e6f1;
+            --secondary-text: #a0a8b4;
+            --font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+            --transition-speed: 0.3s;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            background-image: radial-gradient(circle at 100% 100%, #1a1a33, transparent 50%),
+                              radial-gradient(circle at 0% 0%, #331a33, transparent 50%);
+            background-size: 50% 50%;
+            background-repeat: no-repeat;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+            position: sticky;
+            top: 0;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            background-color: rgba(13, 17, 23, 0.8);
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            color: var(--neon-green);
+            text-shadow: 0 0 5px var(--neon-green), 0 0 10px var(--neon-green);
+        }
+
+        .glass-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 1.5rem;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+            transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.05), transparent);
+            opacity: 0;
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .glass-card:hover::before {
+            opacity: 1;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            color: var(--neon-blue);
+            text-shadow: 0 0 3px var(--neon-blue);
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--neon-blue);
+            padding-left: 1rem;
+        }
+
+        .grid-container {
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+
+        /* Dashboard Styles */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .progress-ring {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .progress-ring-svg {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-circle {
+            transition: stroke-dashoffset var(--transition-speed) ease-in-out;
+        }
+
+        .progress-ring-label {
+            position: absolute;
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--neon-green);
+        }
+
+        .progress-ring-title {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            text-align: center;
+            color: var(--secondary-text);
+        }
+
+        .heatmap-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .heatmap-day {
+            width: 100%;
+            padding-top: 100%;
+            position: relative;
+            background-color: var(--card-bg);
+            border-radius: 4px;
+            transition: background-color var(--transition-speed) ease;
+        }
+
+        .heatmap-day.solved-1 { background-color: rgba(0, 255, 170, 0.2); }
+        .heatmap-day.solved-2 { background-color: rgba(0, 255, 170, 0.4); }
+        .heatmap-day.solved-3 { background-color: rgba(0, 255, 170, 0.6); }
+        .heatmap-day.solved-4 { background-color: rgba(0, 255, 170, 0.8); }
+        .heatmap-day.solved-5 { background-color: rgba(0, 255, 170, 1.0); }
+        
+        /* Accordion Styles */
+        .accordion-item {
+            margin-bottom: 1.5rem;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .accordion-header {
+            padding: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            color: var(--neon-blue);
+            transition: background-color var(--transition-speed) ease;
+            user-select: none;
+        }
+        
+        .accordion-header:hover {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .accordion-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+        
+        .accordion-header svg {
+            transition: transform var(--transition-speed) ease;
+        }
+        
+        .accordion-item.active .accordion-header svg {
+            transform: rotate(180deg);
+        }
+
+        .accordion-content {
+            padding: 0 1.5rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height var(--transition-speed) ease-in-out, padding-top var(--transition-speed) ease-in-out, padding-bottom var(--transition-speed) ease-in-out;
+        }
+        
+        .accordion-item.active .accordion-content {
+            max-height: 1000px; /* A large value to allow content to expand */
+            padding: 1rem 1.5rem 1.5rem;
+        }
+
+        .problem-list li {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 0;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .problem-list li:first-child {
+            border-top: none;
+        }
+
+        .problem-title {
+            flex-grow: 1;
+        }
+
+        .tag {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 1rem;
+            font-weight: bold;
+            color: var(--bg-color);
+        }
+        
+        .tag-LC, .tag-CF { background-color: #ffaa00; }
+        .tag-GFG { background-color: #00b33c; }
+        .tag-NC { background-color: #33aaff; }
+
+        .time-input {
+            width: 60px;
+            padding: 0.25rem;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .problem-link {
+            color: var(--text-color);
+            transition: color var(--transition-speed) ease;
+            text-decoration: none;
+        }
+
+        .problem-link:hover {
+            color: var(--neon-blue);
+        }
+
+        /* Calendar Styles */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+        }
+
+        .calendar-day {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color var(--transition-speed) ease;
+        }
+        
+        .calendar-day-header {
+            font-size: 0.9rem;
+            font-weight: bold;
+            text-align: center;
+            color: var(--neon-blue);
+            padding: 0.5rem;
+        }
+
+        .calendar-day:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .calendar-day.today {
+            border-color: var(--neon-green);
+            box-shadow: 0 0 5px var(--neon-green);
+        }
+        
+        .calendar-day.completed {
+            background-color: rgba(0, 255, 170, 0.15);
+        }
+
+        .calendar-day span {
+            display: block;
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .calendar-day small {
+            font-size: 0.75rem;
+            color: var(--secondary-text);
+        }
+
+        /* Mock Interview Styles */
+        .mock-setup {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .mock-setup button, .mock-session button {
+            padding: 0.75rem 1.5rem;
+            background: var(--neon-blue);
+            color: var(--bg-color);
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+        }
+
+        .mock-setup button:hover, .mock-session button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 119, 255, 0.4);
+        }
+
+        .mock-session-container {
+            display: none;
+        }
+        
+        .mock-session-container.active {
+            display: block;
+        }
+
+        .timer {
+            font-size: 3rem;
+            font-weight: bold;
+            text-align: center;
+            color: var(--neon-green);
+            text-shadow: 0 0 5px var(--neon-green), 0 0 10px var(--neon-green);
+            margin-bottom: 1.5rem;
+        }
+
+        .mock-problems-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        /* Chart Styles */
+        .chart-container {
+            width: 100%;
+            height: 300px;
+            position: relative;
+        }
+
+        /* Settings Dialog */
+        .settings-dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 50px rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .settings-dialog.active {
+            display: flex;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            z-index: 1999;
+            display: none;
+        }
+
+        .modal-overlay.active {
+            display: block;
+        }
+
+        .settings-dialog textarea {
+            width: 100%;
+            min-height: 150px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            border-radius: 8px;
+            padding: 0.5rem;
+            resize: vertical;
+        }
+        
+        button {
+            padding: 0.75rem 1.5rem;
+            background: var(--neon-purple);
+            color: var(--text-color);
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(136, 0, 255, 0.4);
+        }
+
+        .reset-button {
+            background-color: var(--neon-red);
+            text-shadow: 0 0 5px var(--neon-red);
+        }
+        
+        .reset-button:hover {
+            box-shadow: 0 4px 10px rgba(255, 51, 102, 0.4);
+        }
+
+        /* Utility classes */
+        .spacer { height: 2rem; }
+        .hidden { display: none; }
+        .flex-center { display: flex; justify-content: center; align-items: center; }
+        
+        /* Checkbox styling */
+        input[type="checkbox"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 1.2rem;
+            height: 1.2rem;
+            border: 2px solid var(--neon-blue);
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            transition: background-color var(--transition-speed) ease;
+        }
+
+        input[type="checkbox"]:checked {
+            background-color: var(--neon-green);
+            border-color: var(--neon-green);
+        }
+
+        input[type="checkbox"]:checked::before {
+            content: "✓";
+            color: var(--bg-color);
+            font-size: 1rem;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        @media (max-width: 768px) {
+            .container { padding: 0 0.5rem; }
+            header { padding: 1rem 0.5rem; }
+            .kpi-grid { grid-template-columns: 1fr; }
+            .weekly-plan { display: block; }
+            .glass-card { margin-bottom: 1.5rem; }
+            .calendar-grid { grid-template-columns: repeat(2, 1fr); }
+            .heatmap-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">DSA Progress Tracker</div>
+        <button id="settings-btn" aria-label="Open settings">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+        </button>
+    </header>
+
+    <main class="container">
+        <section class="glass-card" aria-labelledby="dashboard-heading">
+            <h2 id="dashboard-heading">Dashboard</h2>
+            <div class="kpi-grid">
+                <div class="progress-ring" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="LeetCode Progress">
+                    <svg class="progress-ring-svg" width="120" height="120">
+                        <circle class="progress-ring-circle" stroke="#2a2a2a" stroke-width="8" fill="transparent" r="52" cx="60" cy="60"></circle>
+                        <circle id="progress-lc" class="progress-ring-circle" stroke="var(--neon-blue)" stroke-width="8" fill="transparent" r="52" cx="60" cy="60" style="stroke-dasharray: 326.7; stroke-dashoffset: 326.7;"></circle>
+                    </svg>
+                    <div class="progress-ring-label" id="progress-label-lc">0%</div>
+                    <div class="progress-ring-title">LeetCode/CF</div>
+                </div>
+                <div class="progress-ring" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="GFG Progress">
+                    <svg class="progress-ring-svg" width="120" height="120">
+                        <circle class="progress-ring-circle" stroke="#2a2a2a" stroke-width="8" fill="transparent" r="52" cx="60" cy="60"></circle>
+                        <circle id="progress-gfg" class="progress-ring-circle" stroke="var(--neon-green)" stroke-width="8" fill="transparent" r="52" cx="60" cy="60" style="stroke-dasharray: 326.7; stroke-dashoffset: 326.7;"></circle>
+                    </svg>
+                    <div class="progress-ring-label" id="progress-label-gfg">0%</div>
+                    <div class="progress-ring-title">GFG 160</div>
+                </div>
+                <div class="progress-ring" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="NeetCode Progress">
+                    <svg class="progress-ring-svg" width="120" height="120">
+                        <circle class="progress-ring-circle" stroke="#2a2a2a" stroke-width="8" fill="transparent" r="52" cx="60" cy="60"></circle>
+                        <circle id="progress-nc" class="progress-ring-circle" stroke="var(--neon-purple)" stroke-width="8" fill="transparent" r="52" cx="60" cy="60" style="stroke-dasharray: 326.7; stroke-dashoffset: 326.7;"></circle>
+                    </svg>
+                    <div class="progress-ring-label" id="progress-label-nc">0%</div>
+                    <div class="progress-ring-title">NeetCode.io</div>
+                </div>
+                <div class="progress-ring">
+                    <div class="progress-ring-label" id="total-solved-label">0</div>
+                    <div class="progress-ring-title">Total Solved</div>
+                </div>
+            </div>
+            <h3>Current Streak</h3>
+            <div id="streak-heatmap" class="heatmap-grid" role="grid" aria-label="Daily Streak Heatmap"></div>
+        </section>
+
+        <div class="spacer"></div>
+
+        <section class="weekly-plan" aria-labelledby="weekly-plan-heading">
+            <h2 id="weekly-plan-heading">Weekly Plan</h2>
+            <div id="weekly-plan-container" role="tablist"></div>
+        </section>
+
+        <div class="spacer"></div>
+
+        <section class="glass-card" aria-labelledby="daily-routine-heading">
+            <h2 id="daily-routine-heading">Daily Routine</h2>
+            <div id="calendar-view" class="calendar-grid" role="grid" aria-label="Daily Routine Calendar">
+                <div role="columnheader" class="calendar-day-header">Sun</div>
+                <div role="columnheader" class="calendar-day-header">Mon</div>
+                <div role="columnheader" class="calendar-day-header">Tue</div>
+                <div role="columnheader" class="calendar-day-header">Wed</div>
+                <div role="columnheader" class="calendar-day-header">Thu</div>
+                <div role="columnheader" class="calendar-day-header">Fri</div>
+                <div role="columnheader" class="calendar-day-header">Sat</div>
+            </div>
+        </section>
+
+        <div class="spacer"></div>
+
+        <section class="glass-card" aria-labelledby="mock-interview-heading">
+            <h2 id="mock-interview-heading">Mock Interview Mode</h2>
+            <div id="mock-setup-container" class="mock-setup">
+                <button id="start-mock-60" role="button">Start 60 min Mock</button>
+                <button id="start-mock-75" role="button">Start 75 min Mock</button>
+            </div>
+            <div id="mock-session-container" class="mock-session-container">
+                <div id="timer" class="timer">00:00</div>
+                <div class="flex-center" style="gap: 1rem; margin-bottom: 1.5rem;">
+                    <button id="pause-resume-btn" role="button">Pause</button>
+                    <button id="end-mock-btn" class="reset-button" role="button">End</button>
+                </div>
+                <h3>Problems for this session:</h3>
+                <ul id="mock-problems-list" class="mock-problems-list"></ul>
+            </div>
+        </section>
+
+        <div class="spacer"></div>
+
+        <section class="glass-card" aria-labelledby="insights-heading">
+            <h2 id="insights-heading">Insights</h2>
+            <div class="grid-container">
+                <div class="chart-card">
+                    <h3>Solved Per Week</h3>
+                    <canvas id="solves-per-week-chart" class="chart-container" role="img" aria-label="Chart showing solved problems per week."></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Average Time Per Problem (min)</h3>
+                    <canvas id="avg-time-chart" class="chart-container" role="img" aria-label="Chart showing average time spent per problem."></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Category Breakdown</h3>
+                    <canvas id="category-chart" class="chart-container" role="img" aria-label="Pie chart showing breakdown of solved problem categories."></canvas>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="settings-overlay" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="settings-dialog-title"></div>
+    <div id="settings-dialog" class="settings-dialog">
+        <h3 id="settings-dialog-title">Settings</h3>
+        <button id="export-data-btn" role="button">Export Data</button>
+        <button id="import-data-btn" role="button">Import Data</button>
+        <textarea id="import-data-textarea" placeholder="Paste your JSON here..." class="hidden" aria-label="Paste JSON data for import"></textarea>
+        <button id="import-confirm-btn" class="hidden" role="button">Confirm Import</button>
+        <button id="reset-all-data-btn" class="reset-button" role="button">Reset All Data</button>
+    </div>
+
+    <script>
+        const PLAN_DATA = {
+            "weeks": [
+                {"id": 1, "title": "Week 1 – Foundations & Patterns", "goal": "Medium arrays & strings under 25 min", "topics": ["Arrays & Strings (prefix/suffix, two pointers, sliding window)", "Hashing (maps, sets, frequency counters)", "Binary Search & Variants"], "problems": [{"id":"lc-two-sum","title":"Two Sum","source":"LC","url":"https://leetcode.com/problems/two-sum/"}, {"id":"lc-3sum","title":"3Sum","source":"LC","url":"https://leetcode.com/problems/3sum/"}, {"id":"lc-longest-sub-no-repeat","title":"Longest Substring Without Repeating","source":"LC","url":"https://leetcode.com/problems/longest-substring-without-repeating-characters/"}, {"id":"lc-sliding-window-max","title":"Sliding Window Maximum","source":"LC","url":"https://leetcode.com/problems/sliding-window-maximum/"}, {"id":"lc-binary-search","title":"Binary Search","source":"LC","url":"https://leetcode.com/problems/binary-search/"}, {"id":"lc-search-rotated","title":"Search in Rotated Sorted Array","source":"LC","url":"https://leetcode.com/problems/search-in-rotated-sorted-array/"}, {"id":"lc-median-two-sorted","title":"Median of Two Sorted Arrays","source":"LC","url":"https://leetcode.com/problems/median-of-two-sorted-arrays/"}, {"id":"gfg-majority-element","title":"Majority Element","source":"GFG","url":"https://www.geeksforgeeks.org/majority-element/"}, {"id":"gfg-subarray-zero-sum","title":"Subarray with 0 Sum","source":"GFG","url":"https://www.geeksforgeeks.org/find-if-there-is-a-subarray-with-0-sum/"}]},
+                {"id": 2, "title": "Week 2 – Trees + Recursion + Linked Lists", "goal": "Write clean recursive DFS/BFS", "topics": ["Recursion & Backtracking basics","Linked Lists (reverse, detect cycle, merge, intersection)","Trees (DFS, BFS, Diameter, LCA basics)"], "problems": [{"id":"lc-subsets","title":"Subsets","source":"LC","url":"https://leetcode.com/problems/subsets/"}, {"id":"lc-permutations","title":"Permutations","source":"LC","url":"https://leetcode.com/problems/permutations/"}, {"id":"lc-combination-sum","title":"Combination Sum","source":"LC","url":"https://leetcode.com/problems/combination-sum/"}, {"id":"lc-reverse-ll","title":"Reverse Linked List","source":"LC","url":"https://leetcode.com/problems/reverse-linked-list/"}, {"id":"lc-merge-two-sorted","title":"Merge Two Sorted Lists","source":"LC","url":"https://leetcode.com/problems/merge-two-sorted-lists/"}, {"id":"lc-detect-cycle-ll","title":"Linked List Cycle","source":"LC","url":"https://leetcode.com/problems/linked-list-cycle/"}, {"id":"lc-level-order","title":"Binary Tree Level Order Traversal","source":"LC","url":"https://leetcode.com/problems/binary-tree-level-order-traversal/"}, {"id":"lc-diameter-bt","title":"Diameter of Binary Tree","source":"LC","url":"https://leetcode.com/problems/diameter-of-binary-tree/"}, {"id":"lc-lca-bt","title":"Lowest Common Ancestor of a Binary Tree","source":"LC","url":"https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/"}, {"id":"gfg-mirror-bt","title":"Mirror of Binary Tree","source":"GFG"}, {"id":"gfg-serde-bt","title":"Serialize & Deserialize Tree","source":"GFG"}]},
+                {"id": 3, "title": "Week 3 – Graphs + DP Basics", "goal": "Handle medium graph/DP problems confidently", "topics": ["Graphs: BFS, DFS, Topological Sort, Dijkstra","DP Basics: 1D DP (Fibonacci, LIS, House Robber, Coin Change)","Grids (DFS/BFS on 2D arrays)"], "problems": [{"id":"lc-num-islands","title":"Number of Islands","source":"LC","url":"https://leetcode.com/problems/number-of-islands/"}, {"id":"lc-word-ladder","title":"Word Ladder","source":"LC","url":"https://leetcode.com/problems/word-ladder/"}, {"id":"lc-course-schedule","title":"Course Schedule","source":"LC","url":"https://leetcode.com/problems/course-schedule/"}, {"id":"lc-dijkstra","title":"Dijkstra (implement)","source":"LC"}, {"id":"lc-climbing-stairs","title":"Climbing Stairs","source":"LC","url":"https://leetcode.com/problems/climbing-stairs/"}, {"id":"lc-coin-change","title":"Coin Change","source":"LC","url":"https://leetcode.com/problems/coin-change/"}, {"id":"lc-lis","title":"Longest Increasing Subsequence","source":"LC","url":"https://leetcode.com/problems/longest-increasing-subsequence/"}, {"id":"gfg-detect-cycle-graph","title":"Detect Cycle in Graph","source":"GFG"}, {"id":"gfg-mst","title":"Minimum Spanning Tree","source":"GFG"}]},
+                {"id": 4, "title": "Week 4 – Advanced DP + Mock Prep", "goal": "Interview-ready across arrays→graphs+DP", "topics": ["Advanced DP: subsequences, strings (LCS, Edit Distance, Palindromes)","Graphs advanced: Union-Find, Kruskal, Prim","Mock practice: timed sessions (60–75 min)"], "problems": [{"id":"lc-edit-distance","title":"Edit Distance","source":"LC","url":"https://leetcode.com/problems/edit-distance/"}, {"id":"lc-lps","title":"Longest Palindromic Subsequence","source":"LC","url":"https://leetcode.com/problems/longest-palindromic-subsequence/"}, {"id":"lc-partition-equal-subset","title":"Partition Equal Subset Sum","source":"LC","url":"https://leetcode.com/problems/partition-equal-subset-sum/"}, {"id":"lc-distinct-subseq","title":"Distinct Subsequences","source":"LC","url":"https://leetcode.com/problems/distinct-subsequences/"}, {"id":"mst-kruskal-prim","title":"MST (Kruskal/Prim)","source":"LC/GFG"}]}
+            ],
+            "dailyRoutine": {"weekdays": {"morning": 2, "evening": 1}, "weekend": {"timedBlock": 5}}
+        };
+
+        const LOCAL_STORAGE_KEYS = {
+            PLAN: 'dsa.plan.v1',
+            PROGRESS: 'dsa.progress.v1',
+            CALENDAR: 'dsa.calendar.v1',
+            SESSIONS: 'dsa.sessions.v1'
+        };
+
+        // --- Helper Functions ---
+        const LS = {
+            get: (key) => {
+                try {
+                    return JSON.parse(localStorage.getItem(key));
+                } catch (e) {
+                    return null;
+                }
+            },
+            set: (key, value) => {
+                try {
+                    localStorage.setItem(key, JSON.stringify(value));
+                } catch (e) {
+                    console.error("Error saving to localStorage", e);
+                }
+            },
+            clear: () => {
+                Object.values(LOCAL_STORAGE_KEYS).forEach(key => localStorage.removeItem(key));
+            }
+        };
+
+        const getOrCreateData = () => {
+            let planData = LS.get(LOCAL_STORAGE_KEYS.PLAN);
+            if (!planData) {
+                planData = PLAN_DATA;
+                LS.set(LOCAL_STORAGE_KEYS.PLAN, planData);
+            }
+
+            let progressData = LS.get(LOCAL_STORAGE_KEYS.PROGRESS);
+            if (!progressData) {
+                progressData = {};
+                PLAN_DATA.weeks.forEach(week => {
+                    week.problems.forEach(p => {
+                        progressData[p.id] = { solved: false, time: null, notes: '' };
+                    });
+                });
+                LS.set(LOCAL_STORAGE_KEYS.PROGRESS, progressData);
+            }
+            
+            let calendarData = LS.get(LOCAL_STORAGE_KEYS.CALENDAR);
+            if (!calendarData) {
+                calendarData = {};
+                LS.set(LOCAL_STORAGE_KEYS.CALENDAR, calendarData);
+            }
+
+            let sessionData = LS.get(LOCAL_STORAGE_KEYS.SESSIONS);
+            if (!sessionData) {
+                sessionData = [];
+                LS.set(LOCAL_STORAGE_KEYS.SESSIONS, sessionData);
+            }
+
+            return { planData, progressData, calendarData, sessionData };
+        };
+
+        const updateProgressRing = (elementId, labelId, solved, total, color) => {
+            const circle = document.getElementById(elementId);
+            const label = document.getElementById(labelId);
+            const ariaEl = circle ? circle.closest('[role="progressbar"]') : null;
+            if (!circle || !label) return;
+
+            const radius = circle.r.baseVal.value;
+            const circumference = radius * 2 * Math.PI;
+            circle.style.strokeDasharray = `${circumference} ${circumference}`;
+            circle.style.stroke = color;
+
+            const progress = total > 0 ? solved / total : 0;
+            const offset = circumference - progress * circumference;
+            circle.style.strokeDashoffset = offset;
+
+            const percentage = Math.round(progress * 100);
+            label.textContent = `${percentage}%`;
+            if (ariaEl) {
+                ariaEl.setAttribute('aria-valuenow', percentage);
+            }
+        };
+
+        const updateAllProgress = () => {
+            const { progressData } = getOrCreateData();
+            const totals = { LC: 0, GFG: 0, NC: 0 };
+            const solved = { LC: 0, GFG: 0, NC: 0 };
+            let totalSolved = 0;
+
+            PLAN_DATA.weeks.forEach(week => {
+                week.problems.forEach(p => {
+                    const source = p.source.includes('LC') || p.source.includes('CF') ? 'LC' : p.source.includes('GFG') ? 'GFG' : 'NC';
+                    totals[source]++;
+                    if (progressData[p.id]?.solved) {
+                        solved[source]++;
+                        totalSolved++;
+                    }
+                });
+            });
+
+            updateProgressRing('progress-lc', 'progress-label-lc', solved.LC, totals.LC, 'var(--neon-blue)');
+            updateProgressRing('progress-gfg', 'progress-label-gfg', solved.GFG, totals.GFG, 'var(--neon-green)');
+            updateProgressRing('progress-nc', 'progress-label-nc', solved.NC, totals.NC, 'var(--neon-purple)');
+            document.getElementById('total-solved-label').textContent = totalSolved;
+            renderStreakHeatmap();
+            renderInsights();
+        };
+
+        const renderWeeklyPlan = () => {
+            const container = document.getElementById('weekly-plan-container');
+            container.innerHTML = '';
+            const { progressData } = getOrCreateData();
+
+            PLAN_DATA.weeks.forEach(week => {
+                const accordionItem = document.createElement('div');
+                accordionItem.className = 'accordion-item';
+                accordionItem.innerHTML = `
+                    <div class="accordion-header" role="button" tabindex="0" aria-expanded="false" aria-controls="week-${week.id}-content">
+                        <h3>${week.title}</h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-down">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+                    <div id="week-${week.id}-content" class="accordion-content" role="region" aria-labelledby="week-${week.id}-header">
+                        <p><strong>Goal:</strong> ${week.goal}</p>
+                        <p><strong>Topics:</strong> ${week.topics.join(', ')}</p>
+                        <ul class="problem-list"></ul>
+                    </div>
+                `;
+                
+                const problemList = accordionItem.querySelector('.problem-list');
+                week.problems.forEach(problem => {
+                    const li = document.createElement('li');
+                    const solvedState = progressData[problem.id]?.solved || false;
+                    const timeSolved = progressData[problem.id]?.time || '';
+                    const url = problem.url || '#';
+                    const sourceTag = problem.source.includes('LC') || problem.source.includes('CF') ? 'LC' : problem.source;
+
+                    li.innerHTML = `
+                        <input type="checkbox" id="prob-${problem.id}" ${solvedState ? 'checked' : ''} data-problem-id="${problem.id}" aria-label="Mark ${problem.title} as done">
+                        <div class="problem-title">
+                            <a href="${url}" target="_blank" rel="noopener" class="problem-link" aria-label="Open ${problem.title} on ${sourceTag}">${problem.title}</a>
+                        </div>
+                        <span class="tag tag-${sourceTag}">${sourceTag}</span>
+                        <input type="number" class="time-input" placeholder="min" value="${timeSolved}" data-problem-id="${problem.id}" aria-label="Time to solve ${problem.title} in minutes">
+                    `;
+                    problemList.appendChild(li);
+                });
+                
+                const header = accordionItem.querySelector('.accordion-header');
+                header.setAttribute('id', `week-${week.id}-header`);
+                header.addEventListener('click', () => {
+                    const isActive = accordionItem.classList.toggle('active');
+                    header.setAttribute('aria-expanded', isActive);
+                });
+                header.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        header.click();
+                    }
+                });
+
+                container.appendChild(accordionItem);
+            });
+
+            container.addEventListener('change', (e) => {
+                if (e.target.matches('input[type="checkbox"]')) {
+                    const problemId = e.target.dataset.problemId;
+                    const isSolved = e.target.checked;
+                    const { progressData } = getOrCreateData();
+                    progressData[problemId].solved = isSolved;
+                    LS.set(LOCAL_STORAGE_KEYS.PROGRESS, progressData);
+                    updateAllProgress();
+                }
+            });
+
+            container.addEventListener('input', (e) => {
+                if (e.target.matches('.time-input')) {
+                    const problemId = e.target.dataset.problemId;
+                    const time = e.target.value;
+                    const { progressData } = getOrCreateData();
+                    progressData[problemId].time = time;
+                    LS.set(LOCAL_STORAGE_KEYS.PROGRESS, progressData);
+                    renderInsights();
+                }
+            });
+        };
+
+        const renderDailyCalendar = () => {
+            const container = document.getElementById('calendar-view');
+            // Retain headers by starting after them
+            const daysContainer = document.createElement('div');
+            daysContainer.className = 'calendar-grid';
+            container.innerHTML = '<div role="columnheader" class="calendar-day-header">Sun</div><div role="columnheader" class="calendar-day-header">Mon</div><div role="columnheader" class="calendar-day-header">Tue</div><div role="columnheader" class="calendar-day-header">Wed</div><div role="columnheader" class="calendar-day-header">Thu</div><div role="columnheader" class="calendar-day-header">Fri</div><div role="columnheader" class="calendar-day-header">Sat</div>';
+            const { calendarData } = getOrCreateData();
+            
+            const today = new Date();
+            const startOfPeriod = new Date();
+            startOfPeriod.setDate(today.getDate() - (today.getDay() + 28));
+            
+            for (let i = 0; i < 28; i++) {
+                const day = new Date(startOfPeriod);
+                day.setDate(startOfPeriod.getDate() + i);
+                const dayString = day.toISOString().split('T')[0];
+                const dayOfWeek = day.getDay();
+                
+                const isWeekday = dayOfWeek !== 0 && dayOfWeek !== 6;
+                const totalGoal = isWeekday 
+                    ? PLAN_DATA.dailyRoutine.weekdays.morning + PLAN_DATA.dailyRoutine.weekdays.evening
+                    : PLAN_DATA.dailyRoutine.weekend.timedBlock;
+                
+                const completedCount = calendarData[dayString]?.completed || 0;
+
+                const dayCard = document.createElement('div');
+                dayCard.className = 'calendar-day';
+                dayCard.setAttribute('role', 'gridcell');
+                dayCard.setAttribute('tabindex', '0');
+                dayCard.setAttribute('aria-label', `${day.toLocaleDateString()} - ${completedCount} out of ${totalGoal} tasks completed. Click to mark a task.`);
+                if (dayString === today.toISOString().split('T')[0]) {
+                    dayCard.classList.add('today');
+                }
+                if (completedCount >= totalGoal) {
+                    dayCard.classList.add('completed');
+                }
+                dayCard.setAttribute('data-date', dayString);
+
+                dayCard.innerHTML = `
+                    <span>${day.getDate()}</span>
+                    <p style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--secondary-text);">Completed: ${completedCount}/${totalGoal}</p>
+                `;
+                
+                dayCard.addEventListener('click', () => {
+                    calendarData[dayString] = calendarData[dayString] || { completed: 0 };
+                    calendarData[dayString].completed = (calendarData[dayString].completed || 0) + 1;
+                    if (calendarData[dayString].completed > totalGoal) {
+                        calendarData[dayString].completed = totalGoal;
+                    }
+                    LS.set(LOCAL_STORAGE_KEYS.CALENDAR, calendarData);
+                    renderDailyCalendar();
+                    renderStreakHeatmap();
+                });
+                
+                container.appendChild(dayCard);
+            }
+        };
+
+        const renderStreakHeatmap = () => {
+            const container = document.getElementById('streak-heatmap');
+            container.innerHTML = '';
+            const { calendarData } = getOrCreateData();
+            const today = new Date();
+            
+            for (let i = 27; i >= 0; i--) {
+                const day = new Date(today);
+                day.setDate(today.getDate() - i);
+                const dayString = day.toISOString().split('T')[0];
+                const completedCount = calendarData[dayString]?.completed || 0;
+                
+                const heatmapDay = document.createElement('div');
+                heatmapDay.className = 'heatmap-day';
+                let solvedClass = '';
+                if (completedCount > 4) solvedClass = 'solved-5';
+                else if (completedCount > 3) solvedClass = 'solved-4';
+                else if (completedCount > 2) solvedClass = 'solved-3';
+                else if (completedCount > 1) solvedClass = 'solved-2';
+                else if (completedCount > 0) solvedClass = 'solved-1';
+                
+                if (solvedClass) heatmapDay.classList.add(solvedClass);
+                
+                heatmapDay.setAttribute('title', `${dayString}: ${completedCount} solved`);
+                heatmapDay.setAttribute('role', 'gridcell');
+                container.appendChild(heatmapDay);
+            }
+        };
+
+        let mockTimer;
+        let mockDuration;
+        let isMockPaused = false;
+        let startTime;
+
+        const startMockInterview = (duration) => {
+            const { progressData } = getOrCreateData();
+            const allProblems = PLAN_DATA.weeks.flatMap(week => week.problems);
+            const availableProblems = allProblems.filter(p => !progressData[p.id]?.solved);
+            
+            if (availableProblems.length < 4) {
+                alert("Not enough unsolved problems left to start a mock interview. You need at least 4. Try resetting your progress.");
+                return;
+            }
+            
+            const numProblems = 4;
+            const selectedProblems = [];
+            
+            for (let i = 0; i < numProblems; i++) {
+                const randomIndex = Math.floor(Math.random() * availableProblems.length);
+                selectedProblems.push(availableProblems[randomIndex]);
+                availableProblems.splice(randomIndex, 1); // Remove problem from pool to avoid duplicates
+            }
+            
+            document.getElementById('mock-setup-container').classList.add('hidden');
+            document.getElementById('mock-session-container').classList.add('active');
+            
+            const problemsList = document.getElementById('mock-problems-list');
+            problemsList.innerHTML = '';
+            selectedProblems.forEach(p => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <input type="checkbox" data-mock-id="${p.id}" id="mock-prob-${p.id}" aria-label="Mark ${p.title} as solved in mock interview">
+                    <a href="${p.url || '#'}" target="_blank" rel="noopener" class="problem-link">${p.title} (${p.source})</a>
+                `;
+                problemsList.appendChild(li);
+            });
+            
+            mockDuration = duration * 60;
+            startTime = Date.now();
+            isMockPaused = false;
+            document.getElementById('pause-resume-btn').textContent = 'Pause';
+            
+            mockTimer = setInterval(updateTimer, 1000);
+            updateTimer();
+        };
+
+        const updateTimer = () => {
+            if (isMockPaused) return;
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const remaining = mockDuration - elapsed;
+            
+            if (remaining <= 0) {
+                endMockInterview();
+                return;
+            }
+            
+            const minutes = Math.floor(remaining / 60);
+            const seconds = remaining % 60;
+            const timerDisplay = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            document.getElementById('timer').textContent = timerDisplay;
+        };
+        
+        const toggleMockPause = () => {
+            isMockPaused = !isMockPaused;
+            document.getElementById('pause-resume-btn').textContent = isMockPaused ? 'Resume' : 'Pause';
+            if (!isMockPaused) {
+                startTime = Date.now() - ((mockDuration - (parseInt(document.getElementById('timer').textContent.split(':')[0]) * 60 + parseInt(document.getElementById('timer').textContent.split(':')[1]))) * 1000);
+            }
+        };
+
+        const endMockInterview = () => {
+            clearInterval(mockTimer);
+            const totalTime = Math.floor((Date.now() - startTime) / 1000);
+            const problems = [];
+            let solvedCount = 0;
+            
+            document.querySelectorAll('#mock-problems-list input[type="checkbox"]').forEach(checkbox => {
+                const problemId = checkbox.dataset.mockId;
+                const isSolved = checkbox.checked;
+                if (isSolved) solvedCount++;
+                problems.push({ id: problemId, solved: isSolved });
+                
+                const { progressData } = getOrCreateData();
+                if (isSolved) {
+                    progressData[problemId].solved = true;
+                    if (!progressData[problemId].time) {
+                        progressData[problemId].time = Math.round(totalTime / problems.length);
+                    }
+                    LS.set(LOCAL_STORAGE_KEYS.PROGRESS, progressData);
+                }
+            });
+            
+            const sessionReport = {
+                date: new Date().toISOString(),
+                duration: mockDuration,
+                actualTime: totalTime,
+                problems: problems,
+                solved: solvedCount
+            };
+            
+            const { sessionData } = getOrCreateData();
+            sessionData.push(sessionReport);
+            LS.set(LOCAL_STORAGE_KEYS.SESSIONS, sessionData);
+
+            document.getElementById('mock-setup-container').classList.remove('hidden');
+            document.getElementById('mock-session-container').classList.remove('active');
+            alert(`Mock Interview Complete!\nProblems Attempted: ${problems.length}\nProblems Solved: ${solvedCount}\nTotal Time: ${Math.floor(totalTime / 60)} min ${totalTime % 60} sec`);
+            
+            updateAllProgress();
+            renderWeeklyPlan();
+            renderInsights();
+        };
+        
+        // --- Insights (Canvas Charts) ---
+        const drawChart = (canvasId, type, data, options) => {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            
+            const {labels, datasets} = data;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'var(--text-color)';
+            ctx.strokeStyle = 'var(--border-color)';
+            ctx.lineWidth = 1;
+            
+            const padding = 20;
+            const chartHeight = canvas.height - 2 * padding - 20;
+            const chartWidth = canvas.width - 2 * padding;
+
+            if (type === 'bar') {
+                const maxVal = Math.max(...datasets[0].data);
+                const barWidth = chartWidth / (labels.length * 2);
+                
+                datasets[0].data.forEach((val, i) => {
+                    const barHeight = (val / maxVal) * chartHeight;
+                    const x = padding + i * (barWidth * 2);
+                    const y = canvas.height - padding - barHeight;
+                    
+                    ctx.fillStyle = datasets[0].backgroundColor[i];
+                    ctx.fillRect(x, y, barWidth, barHeight);
+                    
+                    ctx.fillStyle = 'var(--secondary-text)';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(labels[i], x + barWidth / 2, canvas.height - padding + 15);
+                    ctx.fillText(val, x + barWidth / 2, y - 5);
+                });
+            } else if (type === 'doughnut') {
+                const total = datasets[0].data.reduce((sum, val) => sum + val, 0);
+                const centerX = canvas.width / 2;
+                const centerY = canvas.height / 2;
+                const radius = Math.min(centerX, centerY) * 0.8;
+                let startAngle = 0;
+                
+                datasets[0].data.forEach((val, i) => {
+                    if (val === 0) return;
+                    const sliceAngle = (val / total) * 2 * Math.PI;
+                    ctx.beginPath();
+                    ctx.moveTo(centerX, centerY);
+                    ctx.arc(centerX, centerY, radius, startAngle, startAngle + sliceAngle);
+                    ctx.closePath();
+                    ctx.fillStyle = datasets[0].backgroundColor[i];
+                    ctx.fill();
+
+                    // Draw label
+                    const labelX = centerX + (radius * 0.7) * Math.cos(startAngle + sliceAngle / 2);
+                    const labelY = centerY + (radius * 0.7) * Math.sin(startAngle + sliceAngle / 2);
+                    ctx.fillStyle = 'var(--text-color)';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(labels[i], labelX, labelY);
+                    
+                    startAngle += sliceAngle;
+                });
+            }
+        };
+
+        const renderInsights = () => {
+            const { progressData } = getOrCreateData();
+            
+            // Solves per Week
+            const solvesPerWeek = {};
+            PLAN_DATA.weeks.forEach(week => {
+                solvesPerWeek[week.title] = 0;
+            });
+            PLAN_DATA.weeks.forEach(week => {
+                week.problems.forEach(p => {
+                    if (progressData[p.id]?.solved) {
+                        solvesPerWeek[week.title]++;
+                    }
+                });
+            });
+            drawChart('solves-per-week-chart', 'bar', {
+                labels: Object.keys(solvesPerWeek),
+                datasets: [{
+                    label: 'Solved',
+                    data: Object.values(solvesPerWeek),
+                    backgroundColor: [
+                        'rgba(0, 119, 255, 0.7)',
+                        'rgba(136, 0, 255, 0.7)',
+                        'rgba(0, 255, 170, 0.7)',
+                        'rgba(255, 51, 102, 0.7)'
+                    ]
+                }]
+            }, { responsive: true });
+            
+            // Avg Time per Problem
+            const allTimes = Object.values(progressData)
+                .map(p => parseFloat(p.time))
+                .filter(t => !isNaN(t) && t > 0);
+            const avgTime = allTimes.length > 0 ? (allTimes.reduce((sum, t) => sum + t, 0) / allTimes.length).toFixed(1) : 0;
+            drawChart('avg-time-chart', 'bar', {
+                labels: ['Avg Time'],
+                datasets: [{
+                    label: 'Avg Time (min)',
+                    data: [parseFloat(avgTime)],
+                    backgroundColor: ['rgba(0, 255, 170, 0.7)']
+                }]
+            }, { responsive: true });
+
+            // Category Breakdown
+            const categoryMapping = {
+                "Week 1": "Arrays/Strings", "Week 2": "Trees/LL/Rec", "Week 3": "Graphs/DP", "Week 4": "Advanced DP/Graphs"
+            };
+            const categoryCounts = {};
+            PLAN_DATA.weeks.forEach(week => {
+                const category = categoryMapping[week.title.split(' ')[0] + ' ' + week.title.split(' ')[1]];
+                week.problems.forEach(p => {
+                    if (progressData[p.id]?.solved) {
+                        categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+                    }
+                });
+            });
+            drawChart('category-chart', 'doughnut', {
+                labels: Object.keys(categoryCounts),
+                datasets: [{
+                    data: Object.values(categoryCounts),
+                    backgroundColor: [
+                        'rgba(0, 119, 255, 0.7)',
+                        'rgba(136, 0, 255, 0.7)',
+                        'rgba(0, 255, 170, 0.7)',
+                        'rgba(255, 51, 102, 0.7)'
+                    ]
+                }]
+            }, { responsive: true });
+        };
+        
+        // --- Settings handlers ---
+        const setupSettings = () => {
+            const settingsBtn = document.getElementById('settings-btn');
+            const settingsDialog = document.getElementById('settings-dialog');
+            const settingsOverlay = document.getElementById('settings-overlay');
+            const importBtn = document.getElementById('import-data-btn');
+            const importTextarea = document.getElementById('import-data-textarea');
+            const importConfirmBtn = document.getElementById('import-confirm-btn');
+            const exportBtn = document.getElementById('export-data-btn');
+            const resetBtn = document.getElementById('reset-all-data-btn');
+
+            const toggleSettings = (show) => {
+                settingsDialog.classList.toggle('active', show);
+                settingsOverlay.classList.toggle('active', show);
+            };
+
+            settingsBtn.addEventListener('click', () => toggleSettings(true));
+            settingsOverlay.addEventListener('click', () => toggleSettings(false));
+
+            exportBtn.addEventListener('click', () => {
+                const data = {};
+                Object.values(LOCAL_STORAGE_KEYS).forEach(key => {
+                    data[key] = LS.get(key);
+                });
+                const dataStr = JSON.stringify(data, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'dsa_tracker_data.json';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+            
+            importBtn.addEventListener('click', () => {
+                importTextarea.classList.remove('hidden');
+                importConfirmBtn.classList.remove('hidden');
+            });
+            
+            importConfirmBtn.addEventListener('click', () => {
+                try {
+                    const importedData = JSON.parse(importTextarea.value);
+                    if (importedData) {
+                        Object.entries(importedData).forEach(([key, value]) => {
+                            LS.set(key, value);
+                        });
+                        alert('Data imported successfully!');
+                        location.reload();
+                    }
+                } catch (e) {
+                    alert('Invalid JSON data. Please ensure it is a valid JSON object.');
+                }
+            });
+
+            resetBtn.addEventListener('click', () => {
+                if (confirm('Are you sure you want to reset all progress? This action is irreversible.')) {
+                    LS.clear();
+                    location.reload();
+                }
+            });
+        };
+
+        // --- Event Listeners ---
+        document.addEventListener('DOMContentLoaded', () => {
+            getOrCreateData();
+            updateAllProgress();
+            renderWeeklyPlan();
+            renderDailyCalendar();
+            setupSettings();
+            
+            document.getElementById('start-mock-60').addEventListener('click', () => startMockInterview(60));
+            document.getElementById('start-mock-75').addEventListener('click', () => startMockInterview(75));
+            document.getElementById('pause-resume-btn').addEventListener('click', toggleMockPause);
+            document.getElementById('end-mock-btn').addEventListener('click', endMockInterview);
+        });
+    </script>
+</body>
+</html>
